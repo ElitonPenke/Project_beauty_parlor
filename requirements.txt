@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+sqlalchemy
+alembic
+sqlalchemy-utils
+bcrypt
+dotenv
+PyJWT
+python-multipart
