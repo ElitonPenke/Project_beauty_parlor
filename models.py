@@ -1,8 +1,14 @@
+#para criar e fazer modificações do meu banco de dados 
+#alembic init alembic
+#alembic revision --autogenerate -m"fist migration"
+#alembic upgrade head
+
+
 from datetime import datetime,timedelta
 from sqlalchemy import create_engine,Column,String,Integer,Boolean,Float,ForeignKey,DateTime,Text,Date
 from sqlalchemy.orm import declarative_base,relationship
 
-db=create_engine("sqlite:///bd.db")
+db=create_engine("sqlite:///banco.db")
 
 base=declarative_base()
 
