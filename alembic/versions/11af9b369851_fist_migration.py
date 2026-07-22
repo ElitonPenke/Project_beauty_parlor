@@ -1,8 +1,8 @@
 """fist migration
 
-Revision ID: beb34d3f8325
+Revision ID: 11af9b369851
 Revises: 
-Create Date: 2026-07-21 09:46:58.403092
+Create Date: 2026-07-22 16:41:32.279319
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'beb34d3f8325'
+revision: str = '11af9b369851'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -37,13 +37,22 @@ def upgrade() -> None:
     sa.Column('email', sa.String(), nullable=False),
     sa.Column('telefone', sa.String(), nullable=False),
     sa.Column('senha', sa.String(), nullable=False),
+    sa.Column('sexo', sa.String(), nullable=True),
+    sa.Column('dataNascimento', sa.Date(), nullable=True),
+    sa.Column('endereco', sa.String(), nullable=False),
     sa.Column('ativo', sa.Boolean(), nullable=True),
     sa.Column('admin', sa.Boolean(), nullable=True),
-    sa.Column('endereco', sa.String(), nullable=False),
     sa.Column('data_cadastro', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('telefone')
+    )
+    op.create_table('cores',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('nome', sa.String(), nullable=False),
+    sa.Column('codigo_hex', sa.String(), nullable=True),
+    sa.Column('disponivel', sa.Boolean(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('servicos',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -51,7 +60,6 @@ def upgrade() -> None:
     sa.Column('descricao', sa.Text(), nullable=False),
     sa.Column('preco', sa.Float(), nullable=False),
     sa.Column('duracao_min', sa.Integer(), nullable=False),
-    sa.Column('cor', sa.String(), nullable=True),
     sa.Column('data_cadastro', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
@@ -71,9 +79,11 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('id_agendamento', sa.Integer(), nullable=False),
     sa.Column('id_servico', sa.Integer(), nullable=False),
+    sa.Column('id_cor', sa.Integer(), nullable=True),
     sa.Column('preco_momento', sa.Float(), nullable=False),
     sa.Column('duracao_momento', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['id_agendamento'], ['agendamentos.id'], ),
+    sa.ForeignKeyConstraint(['id_cor'], ['cores.id'], ),
     sa.ForeignKeyConstraint(['id_servico'], ['servicos.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -96,6 +106,7 @@ def downgrade() -> None:
     op.drop_table('agendamento_servico')
     op.drop_table('agendamentos')
     op.drop_table('servicos')
+    op.drop_table('cores')
     op.drop_table('clientes')
     op.drop_table('bloqueios')
     # ### end Alembic commands ###

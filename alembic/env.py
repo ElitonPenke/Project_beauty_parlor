@@ -8,7 +8,6 @@ from alembic import context
 import sys
 import os
 
-
 #linha padrão para todos os projetos para importar a pasta orignal par ao local 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),"..")))
 
@@ -29,7 +28,6 @@ if config.config_file_name is not None:
 from models import base
 
 target_metadata = base.metadata
-
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
