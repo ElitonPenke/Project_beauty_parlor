@@ -27,7 +27,7 @@ def verificar_token(token: str = Depends(oauth2_schema),session = Depends(pegar_
         
     
     #qual user é o dono do token
-    usuario=session.query(user).filter(user.id==id_usuario).first()
+    usuario=session.query(cliente).filter(cliente.id==id_usuario).first()
     if not usuario:
         raise HTTPException(status_code=401,detail='acesso invalido(user n existe)')
     return usuario

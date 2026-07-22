@@ -45,53 +45,48 @@ def autenticar_usuario(email,senha,session):
 #----------------------------------------------------------------------------------------------------------------
 
 
-#estou postando informações no meu bd
-@auth_router.post("/criar_conta")                          #o cliente n passa esse parametro e sim ele puxa do Depends
-async def criar_conta(cliente_Schema:UsuarioSchema,session:Session = Depends(pegar_sessao)): #passa os parametos e o proprio fastapi vai verificar os tipos da variavel
+@auth_router.post("/criar_conta")                
+async def criar_conta(cliente_Schema:UsuarioSchema,session:Session = Depends(pegar_sessao)): 
     
-    #print(cliente_Schema.model_dump())
-    
-    usuario= session.query(cliente).filter(cliente.email==cliente_Schema.email).first() #uma query para ver se tem um cliente do bd igual ao meu atual tentando inserir
+    usuario= session.query(cliente).filter(cliente.email==cliente_Schema.email).first()
+    celular=session.query(cliente).filter(cliente.telefone==cliente_Schema.telefone).first()
     
     
     if usuario:
-        #raise para interromper a função com erro
         raise HTTPException(status_code=400, detail="ja existe um usuario com esse email")
-    else:
-        if cliente_Schema.admin==True:
-            raise HTTPException(status_code=400, detail="essa rota é para apenas cliente para admin:false")
-        senha_criptgrafada=bcrypt.hashpw(cliente_Schema.senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-        
-        novo_usuario= cliente(cliente_Schema.nome,cliente_Schema.email,senha_criptgrafada,cliente_Schema.endereco,cliente_Schema.admin,cliente_Schema.admin)
-        
-        session.add(novo_usuario)
-        session.commit() #comita tudo e encera a seção
-        
-        return {"mensagem": f"Usuario cadastrado com sucesso meu chapa, bem vindo {cliente_Schema.nome}"}
+    if celular:
+        raise HTTPException(status_code=400, detail="ja existe um usuario com esse telefone")
+   
+    if cliente_Schema.admin==True:
+        raise HTTPException(status_code=400, detail="essa rota é para apenas cliente para admin:false")
+    
+    senha_criptgrafada=bcrypt.hashpw(cliente_Schema.senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    
+    novo_usuario= cliente(cliente_Schema.nome,cliente_Schema.email,senha_criptgrafada,cliente_Schema.telefone,cliente_Schema.endereco,cliente_Schema.ativo,cliente_Schema.admin)
+    
+    session.add(novo_usuario)
+    session.commit() 
+    
+    return {"mensagem": f"Usuario cadastrado com sucesso meu chapa, bem vindo {cliente_Schema.nome}"}
     
 
-@auth_router.post("/criar_conta_admin")                          #o cliente n passa esse parametro e sim ele puxa do Depends
-async def criar_conta_admin(cliente_Schema:UsuarioSchema,session:Session = Depends(pegar_sessao), usuario:cliente = Depends(verificar_token)): #passa os parametos e o proprio fastapi vai verificar os tipos da variavel
+@auth_router.post("/criar_conta_admin")                     
+async def criar_conta_admin(cliente_Schema:UsuarioSchema,session:Session = Depends(pegar_sessao), usuario:cliente = Depends(verificar_token)): 
     
-    #print(cliente_Schema.model_dump())
-    
-    Usuario= session.query(cliente).filter(cliente.email==cliente_Schema.email).first() #uma query para ver se tem um cliente do bd igual ao meu atual tentando inserir
-    
+    Usuario= session.query(cliente).filter(cliente.email==cliente_Schema.email).first() 
     
     if Usuario:
-        #raise para interromper a função com erro
         raise HTTPException(status_code=400, detail="ja existe um usuario com esse email")
     else:
-        #se o usuario n é admin da erro
-        if not usuario.admin :
-            raise HTTPException(status_code=401,detail='vc n tem autorização para criar conta admin')
+        if usuario.admin==False:
+            raise HTTPException(status_code=400, detail="vc n tem acesso, somente admins")
     
-    
-        #aqui o bcrypt converte para bytes, criptografa, converte para texteo normal  e o gensalt ele cria um texteo aletaotio para cda senha em si 
-        senha_criptgrafada=bcrypt.hashpw(cliente_Schema.senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8') #hash é para tranformar em codigo aleatorio minha string
-        novo_usuario= cliente(cliente_Schema.nome,cliente_Schema.email,senha_criptgrafada,cliente_Schema.endereco,cliente_Schema.admin,cliente_Schema.admin)
+        senha_criptgrafada=bcrypt.hashpw(cliente_Schema.senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        
+        novo_usuario= cliente(cliente_Schema.nome,cliente_Schema.email,senha_criptgrafada,cliente_Schema.telefone,cliente_Schema.endereco,cliente_Schema.ativo,cliente_Schema.admin)
+        
         session.add(novo_usuario)
-        session.commit() #comita tudo e encera a seção
+        session.commit()
         return {"mensagem": f"Usuario ADMIN cadastrado com sucesso {cliente_Schema.nome}"}
     
 
@@ -135,7 +130,7 @@ async def use_refresh_token(usuario:cliente = Depends(verificar_token)):
 @auth_router.post("/login_pelo_form")
 async def login_pelo_form(dados_formulario:OAuth2PasswordRequestForm=Depends() ,session: Session = Depends(pegar_sessao)):
     
-    usuario = autenticar_usuario(dados_formulario.clientename, dados_formulario.password,session)
+    usuario = autenticar_usuario(dados_formulario.username, dados_formulario.password,session)
     
     if not usuario:
         raise HTTPException(status_code=400, detail="cliente ñ encontrado ou senha incorreta")
