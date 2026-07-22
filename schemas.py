@@ -7,7 +7,6 @@ from typing import Optional, List
 
 
 #PADRÕES DE INSERVAÇÃO DE DADOS ---------------------------------------
-#essa classe vai me dizer o que eu preciso passar exatamente o formato do novo user
 class UsuarioSchema(BaseModel):
     nome:str
     email:EmailStr
@@ -22,12 +21,20 @@ class UsuarioSchema(BaseModel):
     class Config:
         from_attributes=True
  
- 
- 
 class LoginSchema(BaseModel):
     email:str
     senha:str
     
     class Config:
         from_attributes=True
+        
+class ServicoSchema(BaseModel):
+    titulo:str
+    descricao:str
+    preco:float
+    duracao_min:int
+    
+    class Config:
+        from_attributes=True
+    
 #PADRÕES DE RESPOSTA DE DADOS ---------------------------------------

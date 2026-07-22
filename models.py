@@ -73,9 +73,9 @@ class Agendamento(base):
     observacao = Column("observacao", Text, nullable=True)
 
     # deletar um agendamento, o SQLAlchemy deleta junto todas as linhas de agendamento_servico que apontam pra ele
-    servicos = relationship("agendamento_servico", back_populates="agendamento", cascade="all,delete")    
+    servicos = relationship("AgendamentoServico", back_populates="agendamento", cascade="all,delete")    
     #so para puxar quem junto de qm é
-    cliente_relacionamento = relationship("cliente")
+    cliente_relacionamento = relationship("Cliente")
 
     def __init__(self, id_cliente, data, horario_inicio,observacao ,status="pendente",horario_termino=None):
         self.id_cliente = id_cliente
@@ -96,7 +96,7 @@ class Agendamento(base):
 
 
 # agendamento_servico (tabela de junção entre um agendamente e um serviço em si == N:N)
-class Agendamento_Servico(base):
+class AgendamentoServico(base):
     __tablename__ = "agendamento_servico"
 
     id = Column("id", Integer, primary_key=True, autoincrement=True)
@@ -107,9 +107,9 @@ class Agendamento_Servico(base):
     duracao_total_momento = Column("duracao_momento", Integer, nullable=False)
 
     #para ver direto,sem precisa de query manual
-    servico = relationship("servico")
-    agendamento = relationship("agendamento", back_populates="servicos")
-    core=relationship("cor")
+    servico = relationship("Servico")
+    agendamento = relationship("Agendamento", back_populates="servicos")
+    core=relationship("Cor")
     
     def __init__(self, id_agendamento, id_servico,id_cor, preco_momento, duracao_total_momento):
         self.id_agendamento = id_agendamento

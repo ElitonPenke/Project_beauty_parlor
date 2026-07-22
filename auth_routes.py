@@ -1,15 +1,14 @@
 from fastapi import APIRouter,Depends,HTTPException 
 from fastapi.security import OAuth2PasswordRequestForm 
-from models import cliente
+from models import Cliente
 from dependecies import pegar_sessao,verificar_token
-from schemas import UsuarioSchema 
-from schemas import LoginSchema
+from schemas import UsuarioSchema,LoginSchema 
 from main import bcrypt,ACCESS_TOKEN_EXPERIUS_MINUTES,ALG,SECRET_KEY
 import jwt
 from sqlalchemy.orm import Session
 from datetime import datetime,timedelta,timezone
 
-auth_router = APIRouter(prefix="/autenticacao", tags=['roteador_autenticacao']) #definindo que todas as rotas 
+auth_router = APIRouter(prefix="/authentication ", tags=['roteador_authentication'])
 
 #----------------------------------------------------------------------------------------------------------------
 #jwt (json web token)
@@ -24,7 +23,7 @@ def criar_token(id_usuario,duracao_token=timedelta(minutes=ACCESS_TOKEN_EXPERIUS
 
 #----------------------------------------------------------------------------------------------------------------
 def autenticar_usuario(email,senha,session):
-    usuario = session.query(cliente).filter(cliente.email==email).first()
+    usuario = session.query(Cliente).filter(Cliente.email==email).first()
     
     if not usuario:
         return False
@@ -37,20 +36,18 @@ def autenticar_usuario(email,senha,session):
 @auth_router.post("/criar_conta")                
 async def criar_conta(cliente_Schema:UsuarioSchema,session:Session = Depends(pegar_sessao)): 
     
-    usuario= session.query(cliente).filter(cliente.email==cliente_Schema.email).first()
-    celular=session.query(cliente).filter(cliente.telefone==cliente_Schema.telefone).first()
+    usuario= session.query(Cliente).filter(Cliente.email==cliente_Schema.email).first()
+    celular=session.query(Cliente).filter(Cliente.telefone==cliente_Schema.telefone).first()
     
     
     if usuario:
         raise HTTPException(status_code=400, detail="ja existe um usuario com esse email")
     if celular:
         raise HTTPException(status_code=400, detail="ja existe um usuario com esse telefone")
-    if cliente_Schema.admin==True:
-        raise HTTPException(status_code=400, detail="essa rota é para apenas cliente para admin:false")
-    
+   
     senha_criptgrafada=bcrypt.hashpw(cliente_Schema.senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     
-    novo_usuario= cliente(cliente_Schema.nome,cliente_Schema.email,senha_criptgrafada,cliente_Schema.telefone,cliente_Schema.endereco,cliente_Schema.ativo,cliente_Schema.admin)
+    novo_usuario= Cliente(cliente_Schema.nome,cliente_Schema.email,senha_criptgrafada,cliente_Schema.telefone,cliente_Schema.endereco,cliente_Schema.ativo,cliente_Schema.admin)
     
     session.add(novo_usuario)
     session.commit() 
@@ -60,9 +57,9 @@ async def criar_conta(cliente_Schema:UsuarioSchema,session:Session = Depends(peg
 #----------------------------------------------------------------------------------------------------------------
 
 @auth_router.post("/criar_conta_admin")                     
-async def criar_conta_admin(cliente_Schema:UsuarioSchema,session:Session = Depends(pegar_sessao), usuario:cliente = Depends(verificar_token)): 
+async def criar_conta_admin(cliente_Schema:UsuarioSchema,session:Session = Depends(pegar_sessao), usuario:Cliente = Depends(verificar_token)): 
     
-    Usuario= session.query(cliente).filter(cliente.email==cliente_Schema.email).first() 
+    Usuario= session.query(Cliente).filter(Cliente.email==cliente_Schema.email).first() 
     
     if Usuario:
         raise HTTPException(status_code=400, detail="ja existe um usuario com esse email")
@@ -72,7 +69,7 @@ async def criar_conta_admin(cliente_Schema:UsuarioSchema,session:Session = Depen
     
         senha_criptgrafada=bcrypt.hashpw(cliente_Schema.senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         
-        novo_usuario= cliente(cliente_Schema.nome,cliente_Schema.email,senha_criptgrafada,cliente_Schema.telefone,cliente_Schema.endereco,cliente_Schema.ativo,cliente_Schema.admin)
+        novo_usuario= Cliente(cliente_Schema.nome,cliente_Schema.email,senha_criptgrafada,cliente_Schema.telefone,cliente_Schema.endereco,cliente_Schema.ativo,cliente_Schema.admin)
         
         session.add(novo_usuario)
         session.commit()
@@ -100,9 +97,9 @@ async def login(login_schema:LoginSchema,session:Session = Depends(pegar_sessao)
 #----------------------------------------------------------------------------------------------------------------
 #utilizar o token refresh, verifica a entrada token verificado e atualiza
 @auth_router.get("/refresh")
-async def use_refresh_token(usuario:cliente = Depends(verificar_token)):
+async def use_refresh_token(usuario:Cliente = Depends(verificar_token)):
     
-    access_token=criar_token(cliente.id)
+    access_token=criar_token(Cliente.id)
     return {
             'access_token':access_token,
             'token_type': "Bearer"
