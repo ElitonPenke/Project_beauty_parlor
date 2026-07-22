@@ -1,26 +1,15 @@
-from fastapi import APIRouter,Depends,HTTPException # roteador que vai fazer o modelo, o caminho para abri e fechar o banco e a questão de 
-from fastapi.security import OAuth2PasswordRequestForm # insatncia dos dados do formulario
+from fastapi import APIRouter,Depends,HTTPException 
+from fastapi.security import OAuth2PasswordRequestForm 
 from models import cliente
 from dependecies import pegar_sessao,verificar_token
-
-from schemas import UsuarioSchema # importo meu modleo de parametro para o meu banco de dado
+from schemas import UsuarioSchema 
 from schemas import LoginSchema
-
-
-
-#parte da criptgrafia
 from main import bcrypt,ACCESS_TOKEN_EXPERIUS_MINUTES,ALG,SECRET_KEY
-
 import jwt
-
 from sqlalchemy.orm import Session
 from datetime import datetime,timedelta,timezone
 
-
-#sempre que quiser pegar alguma infromação do banco para verificar e tals, sempre usar o session.query("tabela").filter("tabela".coluna == ....)
-
-auth_router = APIRouter(prefix="/autenticacao", tags=['roteador_autenticacao']) #definindo que todas as rotas aqui vai ficar dentro de auth 
-#ex: dominio/autenticacao/...
+auth_router = APIRouter(prefix="/autenticacao", tags=['roteador_autenticacao']) #definindo que todas as rotas 
 
 #----------------------------------------------------------------------------------------------------------------
 #jwt (json web token)
@@ -33,6 +22,7 @@ def criar_token(id_usuario,duracao_token=timedelta(minutes=ACCESS_TOKEN_EXPERIUS
     
     return jwt_cript
 
+#----------------------------------------------------------------------------------------------------------------
 def autenticar_usuario(email,senha,session):
     usuario = session.query(cliente).filter(cliente.email==email).first()
     
@@ -43,7 +33,6 @@ def autenticar_usuario(email,senha,session):
     return usuario
 
 #----------------------------------------------------------------------------------------------------------------
-
 
 @auth_router.post("/criar_conta")                
 async def criar_conta(cliente_Schema:UsuarioSchema,session:Session = Depends(pegar_sessao)): 
@@ -56,7 +45,6 @@ async def criar_conta(cliente_Schema:UsuarioSchema,session:Session = Depends(peg
         raise HTTPException(status_code=400, detail="ja existe um usuario com esse email")
     if celular:
         raise HTTPException(status_code=400, detail="ja existe um usuario com esse telefone")
-   
     if cliente_Schema.admin==True:
         raise HTTPException(status_code=400, detail="essa rota é para apenas cliente para admin:false")
     
@@ -69,6 +57,7 @@ async def criar_conta(cliente_Schema:UsuarioSchema,session:Session = Depends(peg
     
     return {"mensagem": f"Usuario cadastrado com sucesso meu chapa, bem vindo {cliente_Schema.nome}"}
     
+#----------------------------------------------------------------------------------------------------------------
 
 @auth_router.post("/criar_conta_admin")                     
 async def criar_conta_admin(cliente_Schema:UsuarioSchema,session:Session = Depends(pegar_sessao), usuario:cliente = Depends(verificar_token)): 
@@ -89,11 +78,7 @@ async def criar_conta_admin(cliente_Schema:UsuarioSchema,session:Session = Depen
         session.commit()
         return {"mensagem": f"Usuario ADMIN cadastrado com sucesso {cliente_Schema.nome}"}
     
-
-
-
-
-
+#----------------------------------------------------------------------------------------------------------------
 #login ->email e senha - > token JWT
 @auth_router.post("/login")
 async def login(login_schema:LoginSchema,session:Session = Depends(pegar_sessao)):
@@ -112,7 +97,7 @@ async def login(login_schema:LoginSchema,session:Session = Depends(pegar_sessao)
             'token_type': "Bearer"
                 }
 
-
+#----------------------------------------------------------------------------------------------------------------
 #utilizar o token refresh, verifica a entrada token verificado e atualiza
 @auth_router.get("/refresh")
 async def use_refresh_token(usuario:cliente = Depends(verificar_token)):
@@ -125,7 +110,7 @@ async def use_refresh_token(usuario:cliente = Depends(verificar_token)):
     
     
     
-#--------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------
 #para testar na documentação o login por meio no oauth2 
 @auth_router.post("/login_pelo_form")
 async def login_pelo_form(dados_formulario:OAuth2PasswordRequestForm=Depends() ,session: Session = Depends(pegar_sessao)):

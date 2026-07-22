@@ -27,4 +27,9 @@ oauth2_schema=OAuth2PasswordBearer(tokenUrl='autenticacao/login_pelo_form')
 app= FastAPI()
 
 from auth_routes import auth_router
+from requisition_routes import requisition_router
+from product_routes import product_router
+
 app.include_router(auth_router)
+app.include_router(requisition_router)
+app.include_router(product_router)

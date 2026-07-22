@@ -70,7 +70,7 @@ class agendamento(base):
     presenca_confirmada = Column("presenca_confirmada", Boolean, default=False)
     observacao = Column("observacao", Text, nullable=True)
 
-    # relação com os serviços do agendamento (N:N via agendamento_servico, visto que um agendamento pode ter varios serviços em um so)
+    # deletar um agendamento, o SQLAlchemy deleta junto todas as linhas de agendamento_servico que apontam pra ele
     servicos = relationship("agendamento_servico", cascade="all,delete")
 
     def __init__(self, id_cliente, data, horario_inicio,observacao ,status="pendente",horario_termino=None):
@@ -98,14 +98,33 @@ class agendamento_servico(base):
     id = Column("id", Integer, primary_key=True, autoincrement=True)
     id_agendamento = Column("id_agendamento", Integer, ForeignKey("agendamentos.id"), nullable=False)
     id_servico = Column("id_servico", Integer, ForeignKey("servicos.id"), nullable=False)
+    id_cor = Column("id_cor", Integer, ForeignKey("cor.id"), nullable=True)
     preco_momento = Column("preco_momento", Float, nullable=False)
     duracao_momento = Column("duracao_momento", Integer, nullable=False)
+
+    #para ver direto,sem precisa de query manual
+    cor = relationship("cor")
+    servico = relationship("servico")
+    agendamento = relationship("agendamentos")
 
     def __init__(self, id_agendamento, id_servico, preco_momento, duracao_momento):
         self.id_agendamento = id_agendamento
         self.id_servico = id_servico
         self.preco_momento = preco_momento
         self.duracao_momento = duracao_momento
+            
+class cor(base):
+    __tablename__ = "cores"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nome = Column("nome", String, nullable=False)
+    codigo_hex = Column("codigo_hex", String, nullable=True)
+    disponivel = Column("disponivel", Boolean, default=True)
+
+    def __init__(self, nome, codigo_hex=None, disponivel=True):
+        self.nome = nome
+        self.codigo_hex = codigo_hex
+        self.disponivel = disponivel
 
 
 # notificacao

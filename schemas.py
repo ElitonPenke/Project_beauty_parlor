@@ -1,6 +1,6 @@
 #no python em si n é preciso fixar o tipo de dados, porem é melhor dizer para melhor a velocidade e integridade
 
-from pydantic import BaseModel
+from pydantic import BaseModel,EmailStr
 from typing import Optional, List
 
 
@@ -10,12 +10,13 @@ from typing import Optional, List
 #essa classe vai me dizer o que eu preciso passar exatamente o formato do novo user
 class UsuarioSchema(BaseModel):
     nome:str
-    email:str
+    email:EmailStr
     telefone:str
     senha:str
+    endereco:str
+
     ativo:Optional[bool]
     admin:Optional[bool]
-    endereco:str
     
     #crio um subclass para linkar com o meu models do db(vai ser interpretado para tranformar para SQL)
     class Config:
