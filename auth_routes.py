@@ -8,7 +8,7 @@ import jwt
 from sqlalchemy.orm import Session
 from datetime import datetime,timedelta,timezone
 
-auth_router = APIRouter(prefix="/authentication ", tags=['roteador_authentication'])
+auth_router = APIRouter(prefix="/authentication", tags=['roteador_authentication'])
 
 #----------------------------------------------------------------------------------------------------------------
 #jwt (json web token)
@@ -39,15 +39,26 @@ async def criar_conta(cliente_Schema:UsuarioSchema,session:Session = Depends(peg
     usuario= session.query(Cliente).filter(Cliente.email==cliente_Schema.email).first()
     celular=session.query(Cliente).filter(Cliente.telefone==cliente_Schema.telefone).first()
     
-    
     if usuario:
         raise HTTPException(status_code=400, detail="ja existe um usuario com esse email")
     if celular:
         raise HTTPException(status_code=400, detail="ja existe um usuario com esse telefone")
+    if not usuario.admin :
+        raise HTTPException(status_code=401,detail='vc n tem autorização para criar conta admin')
    
     senha_criptgrafada=bcrypt.hashpw(cliente_Schema.senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     
-    novo_usuario= Cliente(cliente_Schema.nome,cliente_Schema.email,senha_criptgrafada,cliente_Schema.telefone,cliente_Schema.endereco,cliente_Schema.ativo,cliente_Schema.admin)
+    novo_usuario= Cliente(
+        nome=cliente_Schema.nome,
+        email=cliente_Schema.email,
+        telefone=cliente_Schema.telefone,
+        senha=senha_criptgrafada, 
+        sexo=cliente_Schema.sexo,
+        dataNascimento=cliente_Schema.dataNascimento,
+        endereco=cliente_Schema.endereco,
+        ativo=cliente_Schema.ativo,  
+        admin=cliente_Schema.admin
+        )
     
     session.add(novo_usuario)
     session.commit() 
@@ -65,7 +76,7 @@ async def criar_conta_admin(cliente_Schema:UsuarioSchema,session:Session = Depen
         raise HTTPException(status_code=400, detail="ja existe um usuario com esse email")
     else:
         if usuario.admin==False:
-            raise HTTPException(status_code=400, detail="vc n tem acesso, somente admins")
+            raise HTTPException(status_code=400, detail="Você não possui autorização")
     
         senha_criptgrafada=bcrypt.hashpw(cliente_Schema.senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         
@@ -115,6 +126,7 @@ async def login_pelo_form(dados_formulario:OAuth2PasswordRequestForm=Depends() ,
     usuario = autenticar_usuario(dados_formulario.username, dados_formulario.password,session)
     
     if not usuario:
+        print("n achou")
         raise HTTPException(status_code=400, detail="cliente ñ encontrado ou senha incorreta")
     else:
         #cria um token para o cliente

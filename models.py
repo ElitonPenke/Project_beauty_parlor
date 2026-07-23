@@ -50,11 +50,13 @@ class Servico(base):
     descricao = Column("descricao", Text, nullable=False)
     preco = Column("preco", Float, nullable=False)
     duracao_min = Column("duracao_min", Integer, nullable=False)
+    ativo = Column("ativo", Boolean, default=True)
     data_cadastro = Column("data_cadastro", DateTime, default=datetime.now)
 
-    def __init__(self, titulo, preco, duracao_min,descricao=None):
+    def __init__(self, titulo, preco,ativo,duracao_min,descricao=None):
         self.titulo = titulo
         self.preco = preco
+        self.ativo=ativo
         self.duracao_min = duracao_min
         self.descricao = descricao
 
@@ -125,11 +127,13 @@ class Cor(base):
     nome = Column("nome", String, nullable=False)
     codigo_hex = Column("codigo_hex", String, nullable=True)
     disponivel = Column("disponivel", Boolean, default=True)
+    categoria = Column("categoria",String,nullable=False)
 
-    def __init__(self, nome, codigo_hex=None, disponivel=True):
+    def __init__(self, nome,categoria,codigo_hex=None, disponivel=True):
         self.nome = nome
         self.codigo_hex = codigo_hex
         self.disponivel = disponivel
+        self.categoria=categoria
 
 
 # notificacao
