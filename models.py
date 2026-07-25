@@ -79,7 +79,7 @@ class Agendamento(base):
     #so para puxar quem junto de qm é
     cliente_relacionamento = relationship("Cliente")
 
-    def __init__(self, id_cliente, data, horario_inicio,observacao ,status="pendente",horario_termino=None):
+    def __init__(self, id_cliente, data, observacao,horario_inicio,status="pendente",horario_termino=None):
         self.id_cliente = id_cliente
         self.data = data
         self.horario_inicio = horario_inicio
@@ -91,7 +91,8 @@ class Agendamento(base):
         #soma de todos os min dos items de serviços dentro do agendamento
         total_min = sum(item.duracao_total_momento for item in self.servicos)
         self.horario_termino = self.horario_inicio+ timedelta(minutes=total_min)
-        
+        return self.horario_termino
+    
     def calcular_preco(self):
         #soma o preco dos itme em servico
         return sum(item.preco_momento for item in self.servicos)

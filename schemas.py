@@ -1,6 +1,6 @@
 #no python em si n é preciso fixar o tipo de dados, porem é melhor dizer para melhor a velocidade e integridade
 
-from datetime import date
+from datetime import date,datetime
 from pydantic import BaseModel,EmailStr
 from typing import Optional, List
 
@@ -69,5 +69,27 @@ class EditCorSchema (BaseModel):
     
     class Config:
         from_attributes=True
+    
+    
+#pois um agendamento pode ter varios serviços em um so, ent um serviço vira um item que vai estar ligado a um agendamento
+class ItemServicoSchema(BaseModel):
+    id_servico:int
+    id_cor: Optional[int]=None
+    
+    class Config:
+            from_attributes=True
+            
+
+#aqui o agendamento em si que o usuario vai fazer, com uma lsita dos serviços que ele quer fazer, o qual vai ser o modelo de ItemServicoSchema
+class AgendamentoSchema(BaseModel):
+    data:date
+    horario_inicio:datetime
+    observacao:Optional[str]=None
+    #aqui vem a magia 
+    servicos:List[ItemServicoSchema]
+    
+    class Config:
+                from_attributes=True
+    
     
 #PADRÕES DE RESPOSTA DE DADOS ---------------------------------------
