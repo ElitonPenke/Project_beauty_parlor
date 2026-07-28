@@ -36,6 +36,7 @@ class ServicoSchema(BaseModel):
     descricao:str
     preco:float
     duracao_min:int
+    ativo:bool
     
     class Config:
         from_attributes=True

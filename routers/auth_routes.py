@@ -43,8 +43,6 @@ async def criar_conta(cliente_Schema:UsuarioSchema,session:Session = Depends(peg
         raise HTTPException(status_code=400, detail="ja existe um usuario com esse email")
     if celular:
         raise HTTPException(status_code=400, detail="ja existe um usuario com esse telefone")
-    if not usuario.admin :
-        raise HTTPException(status_code=401,detail='vc n tem autorização para criar conta admin')
    
     senha_criptgrafada=bcrypt.hashpw(cliente_Schema.senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     

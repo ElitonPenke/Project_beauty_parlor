@@ -1,5 +1,3 @@
-#criação de pedidos pelo cliente, listagem dos pedidos do próprio usuário, e rotas administrativas tipo mudar status do pedido (pendente → pago → enviado).
-
 from fastapi import APIRouter,Depends,HTTPException 
 from dependecies import pegar_sessao,verificar_token
 from sqlalchemy.orm import Session
@@ -8,13 +6,7 @@ from schemas import AgendamentoSchema
 
 requisition_router = APIRouter(prefix="/requisition", tags=['roteador_requisition'])
 
-@requisition_router.get("/")
-async def listar_produtos():
-    return {"mensagem": "Roteador de requisições funcionando!"}
-
-
-
-@requisition_router.post("/criar_agendamento")
+@requisition_router.post("/agendamento/criar_agendamento")
 async def criar_agendamento(
     agendamento_schema:AgendamentoSchema, 
     session: Session = Depends(pegar_sessao),
@@ -98,3 +90,52 @@ async def criar_agendamento(
         }
     }
 
+
+#cancelar agendamento
+@requisition_router.post("/agendamento/cancelar/{id_agendamento}") 
+async def cancelar_pedido (id_agendamento: int,session:Session = Depends(pegar_sessao),usuario:Cliente = Depends(verificar_token)):
+    agendamento=session.query(Agendamento).filter(Agendamento.id==id_agendamento).first() 
+    
+    if not agendamento:
+        raise HTTPException(status_code=400, detail='Agendamento não encontrado !')
+    
+    if not usuario.admin and usuario.id != agendamento.id_cliente:
+        raise HTTPException(status_code=401,detail='"Função apenas para Admin')
+
+
+    agendamento.status="CALCELADO"
+    session.commit()
+    
+    return {    
+        "mensagem":f' Deu certo o cancelamento do agendamento {agendamento.id}',
+        "agendamento":agendamento
+    }
+    
+    
+#listar todos agendamentos
+@requisition_router.get('/agendamento/listar_agendamento')
+async def listar_pedidos(session:Session = Depends(pegar_sessao),usuario:Cliente = Depends(verificar_token)):
+    
+    if usuario.admin ==False:
+        raise HTTPException(status_code=401,detail='vc n tem autorização para listar os pedidos')
+    else:                           #pedido importo do models
+        todos_agendamentos= session.query(Agendamento).all()
+        return {
+            'agendamentos':todos_agendamentos
+        }
+        
+        
+        
+@requisition_router.get("/agendamento/{id_agendamento}")
+async def visualizar_pedido (id_agendamento: int,session:Session = Depends(pegar_sessao),usuario:Cliente = Depends(verificar_token)):
+    agendamento=session.query(Agendamento).filter(Agendamento.id==id_agendamento).first() 
+    if not agendamento:
+        raise HTTPException(status_code=400, detail='Agendamento não encontrado!')
+    
+    if not usuario.admin and usuario.id != agendamento.id_cliente:
+        raise HTTPException(status_code=401,detail='"Função apenas para Admin')
+    
+    return {
+        'quantidade_iten_pedido': len(Agendamento.servicos),
+        'agendamento':agendamento
+    }
