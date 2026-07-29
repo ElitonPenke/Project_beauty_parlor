@@ -93,4 +93,16 @@ class AgendamentoSchema(BaseModel):
                 from_attributes=True
     
     
+    
+class BloqueioSchema(BaseModel):
+    data:date
+    dia_inteiro:bool
+    hora_inicio:date
+    hora_fim:date
+    motivo:str
+    
+    class Config:
+                    from_attributes=True
+
+
 #PADRÕES DE RESPOSTA DE DADOS ---------------------------------------

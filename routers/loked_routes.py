@@ -1,21 +1,26 @@
-from fastapi import APIRouter
+from fastapi import APIRouter,Depends, HTTPException
+from sqlalchemy.orm import Session
+from dependecies import pegar_sessao, verificar_admin, verificar_token
+from models import Bloqueio,Cliente
+from schemas import BloqueioSchema
 
-loked_router = APIRouter(prefix="/loked", tags=['roteador_loked'])
 
-"""
-@product_router.post("/bloqueio/adicionar_bloqueio")
-async def adicionar_bloqueio(cor_schema:CorSchema, session: Session = Depends(pegar_sessao),usuario:Cliente = Depends(verificar_token)):
+loked_router = APIRouter(prefix="/loked", tags=['roteador_loked'],dependencies=[Depends(verificar_admin)])
+
+
+@loked_router.post("/bloqueio/adicionar_bloqueio")
+async def adicionar_bloqueio(bloquio_schema:BloqueioSchema, session: Session = Depends(pegar_sessao),usuario:Cliente = Depends(verificar_token)):
     
     if usuario.admin==False:
             raise HTTPException(status_code=400, detail="Função apenas para Admin") 
         
-    nova_cor= Cor(cor_schema.nome,cor_schema.categora,cor_schema.codigo_hex,cor_schema.disponivel)
+    novo_bloquio= Bloqueio(data=)
    
-    session.add(nova_cor)
+    session.add(novo_bloquio)
     session.commit()
     
     return {"mensagem": f"Cor novo cadastrado com sucesso, {nova_cor.nome}"}
-
+"""
 @product_router.get('/bloqueio/listar_bloqueio')
 async def listar_bloqueio(session:Session = Depends(pegar_sessao),usuario:Cliente = Depends(verificar_token)):
     
