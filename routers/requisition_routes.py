@@ -161,4 +161,22 @@ async def confrimar_agendamento (id_agendamento: int,session:Session = Depends(p
         "mensagem":f' Agendamento confirmado {agendamento.id}',
         "agendamento":agendamento
     }
+
+#finalizar/concluir agendamento
+@requisition_router.post("/agendamento/finalizar/{id_agendamento}") 
+async def confrimar_agendamento (id_agendamento: int,session:Session = Depends(pegar_sessao),usuario:Cliente = Depends(verificar_token)):
+    
+    agendamento=session.query(Agendamento).filter(Agendamento.id==id_agendamento).first() 
+    
+    if not agendamento:
+        raise HTTPException(status_code=400, detail='Agendamento não encontrado !')
+    
+    agendamento.status="Agendamento/serviço concluído"
+        
+    session.commit()
+    
+    return {    
+        "mensagem":f' Agendamento concluído {agendamento.id}',
+        "agendamento":agendamento
+    }
     

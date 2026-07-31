@@ -27,15 +27,12 @@ async def adicionar_servico(servico_schema:ServicoSchema, session: Session = Dep
 
 #listar serviços existentes
 @services_router.get("/servicos/listar_servicos")
-async def listar_servicos(session:Session = Depends(pegar_sessao),usuario:Cliente = Depends(verificar_token)):
-    
-    if usuario.admin ==False: 
-        raise HTTPException(status_code=401,detail="Função apenas para Admin")
-    else:                     
-        todos_servicos= session.query(Servico).all()
-        return {
-            'servicos':todos_servicos
-        }
+async def listar_servicos(session:Session = Depends(pegar_sessao)):
+                        
+    todos_servicos= session.query(Servico).all()
+    return {
+        'servicos':todos_servicos
+    }
 
 #desativar algum serviço
 @services_router.post('/servicos/{id_servico}/desativar') 

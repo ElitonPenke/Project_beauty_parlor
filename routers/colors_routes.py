@@ -21,14 +21,11 @@ async def adicionar_cor(cor_schema:CorSchema, session: Session = Depends(pegar_s
 
 @colors_router.get('/listar_cor')
 async def listar_cor(session:Session = Depends(pegar_sessao),usuario:Cliente = Depends(verificar_token)):
-    
-    if usuario.admin ==False: 
-        raise HTTPException(status_code=401,detail="Função apenas para Admin")
-    else:                     
-        todas_cores= session.query(Cor).all()
-        return {
-            'servicos':todas_cores
-        }
+                
+    todas_cores= session.query(Cor).all()
+    return {
+        'servicos':todas_cores
+    }
 
 @colors_router.post("/{id_cor}/desativar") 
 
@@ -70,7 +67,6 @@ async def editar_cor(id_cor:int, atualizar_cor:EditCorSchema, session: Session =
     for chave, valor in dados_para_atualizar.items():
         setattr(cor_editar, chave, valor)
 
-    # 3. Salva no banco
     session.commit()
     session.refresh(cor_editar)
 
