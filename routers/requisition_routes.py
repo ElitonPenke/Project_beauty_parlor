@@ -1,11 +1,12 @@
 from fastapi import APIRouter,Depends,HTTPException 
-from dependecies import pegar_sessao,verificar_token
+from dependecies import pegar_sessao,verificar_token,verificar_admin
 from sqlalchemy.orm import Session
 from models import Cliente, AgendamentoServico,Agendamento,Servico,Cor
 from schemas import AgendamentoSchema
 
 requisition_router = APIRouter(prefix="/requisition", tags=['roteador_requisition'])
 
+#cria um agendamento
 @requisition_router.post("/agendamento/criar_agendamento")
 async def criar_agendamento(
     agendamento_schema:AgendamentoSchema, 
@@ -18,7 +19,6 @@ async def criar_agendamento(
             horario_inicio=agendamento_schema.horario_inicio,
             observacao=agendamento_schema.observacao
             )
-    print(novo_agendamento)
     
     session.add(novo_agendamento)
     session.flush()
@@ -50,21 +50,23 @@ async def criar_agendamento(
             preco_momento=servico.preco, #a variavel momentanea do loop
             duracao_total_momento=servico.duracao_min #a variavel momentanea do loop
         )
-        print(item_agendamento)
         
-        session.add(item_agendamento)
+        novo_agendamento.servicos.append(item_agendamento)
         
     session.flush()
 
     #calcula e escreve no bd
     novo_agendamento.calcular_termino()
     
-    hora_termino=novo_agendamento.calcular_termino()
     
-    conflito = session.filter(
-            Agendamento.horario_inicio < hora_termino,
-            Agendamento.hora_termino > novo_agendamento.horario_inicio
-        ).first()
+    conflito = session.query(Agendamento).filter(
+        Agendamento.id != novo_agendamento.id,
+        Agendamento.data == novo_agendamento.data,
+        Agendamento.status!="CALCELADO",
+        Agendamento.horario_inicio < novo_agendamento.horario_termino,
+        Agendamento.horario_termino > novo_agendamento.horario_inicio
+    ).first()
+
     
     if conflito:
         raise HTTPException(status_code=400,detail="Já existe um agendamento nesse horário.")
@@ -118,14 +120,14 @@ async def listar_pedidos(session:Session = Depends(pegar_sessao),usuario:Cliente
     
     if usuario.admin ==False:
         raise HTTPException(status_code=401,detail='vc n tem autorização para listar os pedidos')
-    else:                           #pedido importo do models
+    else:                           
         todos_agendamentos= session.query(Agendamento).all()
         return {
             'agendamentos':todos_agendamentos
         }
         
         
-        
+#o usuario pode ver o seu agendamento     
 @requisition_router.get("/agendamento/{id_agendamento}")
 async def visualizar_pedido (id_agendamento: int,session:Session = Depends(pegar_sessao),usuario:Cliente = Depends(verificar_token)):
     agendamento=session.query(Agendamento).filter(Agendamento.id==id_agendamento).first() 
@@ -136,6 +138,27 @@ async def visualizar_pedido (id_agendamento: int,session:Session = Depends(pegar
         raise HTTPException(status_code=401,detail='"Função apenas para Admin')
     
     return {
-        'quantidade_iten_pedido': len(Agendamento.servicos),
+        'quantidade_servicos_agendamento': len(Agendamento.servicos),
         'agendamento':agendamento
     }
+    
+    
+
+#confirmar agendamento
+@requisition_router.post("/agendamento/confirmar/{id_agendamento}") 
+async def confrimar_agendamento (id_agendamento: int,session:Session = Depends(pegar_sessao),usuario:Cliente = Depends(verificar_token)):
+    agendamento=session.query(Agendamento).filter(Agendamento.id==id_agendamento).first() 
+    
+    if not agendamento:
+        raise HTTPException(status_code=400, detail='Agendamento não encontrado !')
+    
+    agendamento.status="confirmado_agendamento"
+    agendamento.presenca_confirmada=True
+    
+    session.commit()
+    
+    return {    
+        "mensagem":f' Agendamento confirmado {agendamento.id}',
+        "agendamento":agendamento
+    }
+    
