@@ -14,7 +14,7 @@ base=declarative_base()
 
 
 # cliente
-class cliente(base):
+class Cliente(base):
     __tablename__ = "clientes"
 
     id = Column("id", Integer, primary_key=True, autoincrement=True)
@@ -22,23 +22,27 @@ class cliente(base):
     email = Column("email", String, unique=True, nullable=False)
     telefone = Column("telefone", String, unique=True, nullable=False)
     senha = Column("senha", String, nullable=False)
+    sexo = Column("sexo", String, nullable=True)
+    dataNascimento = Column("dataNascimento", Date, nullable=True)
+    endereco = Column("endereco", String, nullable=False)
     ativo = Column("ativo", Boolean, default=True)
     admin = Column("admin", Boolean, default=False)
-    endereco = Column("endereco", String, nullable=False)
     data_cadastro = Column("data_cadastro", DateTime, default=datetime.now)
 
-    def __init__(self, nome, email, senha, telefone,endereco,ativo=True,admin=False):
+    def __init__(self, nome, email,telefone,senha,sexo,dataNascimento,endereco,ativo=True,admin=False):
         self.nome = nome
         self.email = email
-        self.senha = senha
         self.telefone = telefone
+        self.senha = senha
+        self.sexo = sexo
+        self.dataNascimento = dataNascimento
+        self.endereco = endereco
         self.ativo = ativo
         self.admin = admin
-        self.endereco = endereco
 
 
 # servico
-class servico(base):
+class Servico(base):
     __tablename__ = "servicos"
 
     id = Column("id", Integer, primary_key=True, autoincrement=True)
@@ -46,34 +50,36 @@ class servico(base):
     descricao = Column("descricao", Text, nullable=False)
     preco = Column("preco", Float, nullable=False)
     duracao_min = Column("duracao_min", Integer, nullable=False)
-    cor=Column("cor",String,nullable=True)
+    ativo = Column("ativo", Boolean, default=True)
     data_cadastro = Column("data_cadastro", DateTime, default=datetime.now)
 
-    def __init__(self, titulo, preco, duracao_min,cor, descricao=None):
+    def __init__(self, titulo, preco,ativo,duracao_min,descricao=None):
         self.titulo = titulo
         self.preco = preco
+        self.ativo=ativo
         self.duracao_min = duracao_min
-        self.cor=cor
         self.descricao = descricao
 
 
 # agendamento
-class agendamento(base):
+class Agendamento(base):
     __tablename__ = "agendamentos"
 
     id = Column("id", Integer, primary_key=True, autoincrement=True)
     id_cliente = Column("id_cliente", Integer, ForeignKey("clientes.id"), nullable=False)
     data = Column("data", Date, nullable=False)
     horario_inicio = Column("horario_inicio", DateTime, nullable=False)
-    horario_termino = Column("horario_termino", DateTime, nullable=True)  # calculado depois de somar os serviços
+    horario_termino = Column("horario_termino", DateTime, nullable=True)
     status = Column("status", String, default="pendente")
     presenca_confirmada = Column("presenca_confirmada", Boolean, default=False)
     observacao = Column("observacao", Text, nullable=True)
 
-    # relação com os serviços do agendamento (N:N via agendamento_servico, visto que um agendamento pode ter varios serviços em um so)
-    servicos = relationship("agendamento_servico", cascade="all,delete")
+    # deletar um agendamento, o SQLAlchemy deleta junto todas as linhas de agendamento_servico que apontam pra ele
+    servicos = relationship("AgendamentoServico", back_populates="agendamento", cascade="all,delete")    
+    #so para puxar quem junto de qm é
+    cliente_relacionamento = relationship("Cliente")
 
-    def __init__(self, id_cliente, data, horario_inicio,observacao ,status="pendente",horario_termino=None):
+    def __init__(self, id_cliente, data, observacao,horario_inicio,status="pendente",horario_termino=None):
         self.id_cliente = id_cliente
         self.data = data
         self.horario_inicio = horario_inicio
@@ -83,33 +89,56 @@ class agendamento(base):
 
     def calcular_termino(self):
         #soma de todos os min dos items de serviços dentro do agendamento
-        total_min = sum(item.duracao_momento for item in self.servicos)
+        total_min = sum(item.duracao_total_momento for item in self.servicos)
         self.horario_termino = self.horario_inicio+ timedelta(minutes=total_min)
-        
+        return self.horario_termino
+    
     def calcular_preco(self):
         #soma o preco dos itme em servico
         return sum(item.preco_momento for item in self.servicos)
 
 
 # agendamento_servico (tabela de junção entre um agendamente e um serviço em si == N:N)
-class agendamento_servico(base):
+class AgendamentoServico(base):
     __tablename__ = "agendamento_servico"
 
     id = Column("id", Integer, primary_key=True, autoincrement=True)
     id_agendamento = Column("id_agendamento", Integer, ForeignKey("agendamentos.id"), nullable=False)
     id_servico = Column("id_servico", Integer, ForeignKey("servicos.id"), nullable=False)
+    id_cor = Column("id_cor", Integer, ForeignKey("cores.id"), nullable=True)
     preco_momento = Column("preco_momento", Float, nullable=False)
-    duracao_momento = Column("duracao_momento", Integer, nullable=False)
+    duracao_total_momento = Column("duracao_momento", Integer, nullable=False)
 
-    def __init__(self, id_agendamento, id_servico, preco_momento, duracao_momento):
+    #para ver direto,sem precisa de query manual
+    servico = relationship("Servico")
+    agendamento = relationship("Agendamento", back_populates="servicos")
+    core=relationship("Cor")
+    
+    def __init__(self, id_agendamento, id_servico,id_cor, preco_momento, duracao_total_momento):
         self.id_agendamento = id_agendamento
         self.id_servico = id_servico
+        self.id_cor=id_cor
         self.preco_momento = preco_momento
-        self.duracao_momento = duracao_momento
+        self.duracao_total_momento = duracao_total_momento
+            
+class Cor(base):
+    __tablename__ = "cores"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nome = Column("nome", String, nullable=False)
+    codigo_hex = Column("codigo_hex", String, nullable=True)
+    disponivel = Column("disponivel", Boolean, default=True)
+    categoria = Column("categoria",String,nullable=False)
+
+    def __init__(self, nome,categoria,codigo_hex=None, disponivel=True):
+        self.nome = nome
+        self.codigo_hex = codigo_hex
+        self.disponivel = disponivel
+        self.categoria=categoria
 
 
 # notificacao
-class notificacao(base):
+class Notificacao(base):
     __tablename__ = "notificacoes"
 
     id = Column("id", Integer, primary_key=True, autoincrement=True)
@@ -124,7 +153,7 @@ class notificacao(base):
         self.canal = canal
 
 
-class bloqueio(base):
+class Bloqueio(base):
     __tablename__ = "bloqueios"
 
     id = Column("id", Integer, primary_key=True, autoincrement=True)

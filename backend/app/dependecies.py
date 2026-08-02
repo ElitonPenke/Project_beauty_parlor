@@ -1,8 +1,8 @@
 from fastapi import Depends,HTTPException
 from sqlalchemy.orm import sessionmaker,Session # aqui faz uma seção para n ter paraleelismo de compretividade de requisições no meu banco de dados
-from models import db, cliente #importar para fazer pesquisa no meu bd
+from backend.app.models import db, Cliente #importar para fazer pesquisa no meu bd
 import jwt
-from main import SECRET_KEY,ALG,oauth2_schema
+from backend.app.main import SECRET_KEY,ALG,oauth2_schema
 
 #ao inves de colocar para abrie e fechar um sessao em cada lugar do codigo aonde tem rotas ao meu banco e dados, vamos fazer uma def para reutlizar em todo o codigo
 
@@ -27,7 +27,13 @@ def verificar_token(token: str = Depends(oauth2_schema),session = Depends(pegar_
         
     
     #qual user é o dono do token
-    usuario=session.query(user).filter(user.id==id_usuario).first()
+    usuario=session.query(Cliente).filter(Cliente.id==id_usuario).first()
     if not usuario:
         raise HTTPException(status_code=401,detail='acesso invalido(user n existe)')
+    return usuario
+
+#Verifica se é admin 
+def verificar_admin(usuario: Cliente = Depends(verificar_token)):
+    if not usuario.admin:
+        raise HTTPException(status_code=403, detail='Acesso negado (usuario nao é admin)')
     return usuario
