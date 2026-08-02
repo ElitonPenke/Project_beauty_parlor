@@ -1,8 +1,8 @@
 from fastapi import APIRouter,Depends,HTTPException
-from dependecies import pegar_sessao,verificar_token
+from backend.app.dependecies import pegar_sessao,verificar_token
 from sqlalchemy.orm import Session
-from models import Cliente,Cor
-from schemas import CorSchema,EditCorSchema
+from backend.app.models import Cliente,Cor
+from backend.app.schemas import CorSchema,EditCorSchema
 
 colors_router = APIRouter(prefix="/colors", tags=['roteador_colors']) 
 

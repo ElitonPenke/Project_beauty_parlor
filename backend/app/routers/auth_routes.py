@@ -1,9 +1,9 @@
 from fastapi import APIRouter,Depends,HTTPException 
 from fastapi.security import OAuth2PasswordRequestForm 
-from models import Cliente
-from dependecies import pegar_sessao,verificar_token
-from schemas import UsuarioSchema,LoginSchema 
-from main import bcrypt,ACCESS_TOKEN_EXPERIUS_MINUTES,ALG,SECRET_KEY
+from backend.app.models import Cliente
+from backend.app.dependecies import pegar_sessao,verificar_token
+from backend.app.schemas import UsuarioSchema,LoginSchema 
+from backend.app.main import bcrypt,ACCESS_TOKEN_EXPERIUS_MINUTES,ALG,SECRET_KEY
 import jwt
 from sqlalchemy.orm import Session
 from datetime import datetime,timedelta,timezone

@@ -1,6 +1,3 @@
-#cd c:\users\elito\Project_beauty_parlor
-#python -m venv venv
-
 #ativar --  .\venv\Scripts\activate
 #deactivate
 
@@ -25,12 +22,12 @@ oauth2_schema=OAuth2PasswordBearer(tokenUrl='authentication/login_pelo_form')
 
 app= FastAPI()
 
-from routers.auth_routes import auth_router
-from routers.requisition_routes import requisition_router
-from routers.services_routes import services_router
-from routers.colors_routes import colors_router
-from routers.notification_routes import notification_router
-from routers.loked_routes import loked_router
+from backend.app.routers.auth_routes import auth_router
+from backend.app.routers.requisition_routes import requisition_router
+from backend.app.routers.services_routes import services_router
+from backend.app.routers.colors_routes import colors_router
+from backend.app.routers.notification_routes import notification_router
+from backend.app.routers.loked_routes import loked_router
 
 app.include_router(auth_router)
 app.include_router(requisition_router)

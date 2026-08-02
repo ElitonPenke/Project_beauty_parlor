@@ -1,8 +1,8 @@
 from fastapi import APIRouter,Depends, HTTPException
 from sqlalchemy.orm import Session
-from dependecies import pegar_sessao, verificar_admin, verificar_token
-from models import Bloqueio,Cliente
-from schemas import BloqueioSchema
+from backend.app.dependecies import pegar_sessao, verificar_admin, verificar_token
+from backend.app.models import Bloqueio,Cliente
+from backend.app.schemas import BloqueioSchema
 
 
 loked_router = APIRouter(prefix="/loked", tags=['roteador_loked'],dependencies=[Depends(verificar_admin)])

@@ -1,8 +1,8 @@
 from fastapi import Depends,HTTPException
 from sqlalchemy.orm import sessionmaker,Session # aqui faz uma seção para n ter paraleelismo de compretividade de requisições no meu banco de dados
-from models import db, Cliente #importar para fazer pesquisa no meu bd
+from backend.app.models import db, Cliente #importar para fazer pesquisa no meu bd
 import jwt
-from main import SECRET_KEY,ALG,oauth2_schema
+from backend.app.main import SECRET_KEY,ALG,oauth2_schema
 
 #ao inves de colocar para abrie e fechar um sessao em cada lugar do codigo aonde tem rotas ao meu banco e dados, vamos fazer uma def para reutlizar em todo o codigo
 

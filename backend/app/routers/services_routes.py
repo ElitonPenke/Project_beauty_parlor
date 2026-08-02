@@ -1,8 +1,8 @@
 from fastapi import APIRouter,Depends,HTTPException
-from dependecies import pegar_sessao,verificar_token
+from backend.app.dependecies import pegar_sessao,verificar_token
 from sqlalchemy.orm import Session
-from models import Cliente, Servico
-from schemas import ServicoSchema,EditServicoSchema
+from backend.app.models import Cliente, Servico
+from backend.app.schemas import ServicoSchema,EditServicoSchema
 
 services_router = APIRouter(prefix="/services", tags=['roteador_services']) 
 

@@ -1,8 +1,8 @@
 from fastapi import APIRouter,Depends,HTTPException 
-from dependecies import pegar_sessao,verificar_token,verificar_admin
+from backend.app.dependecies import pegar_sessao,verificar_token,verificar_admin
 from sqlalchemy.orm import Session
-from models import Cliente, AgendamentoServico,Agendamento,Servico,Cor
-from schemas import AgendamentoSchema
+from backend.app.models import Cliente, AgendamentoServico,Agendamento,Servico,Cor
+from backend.app.schemas import AgendamentoSchema
 
 requisition_router = APIRouter(prefix="/requisition", tags=['roteador_requisition'])
 

@@ -1,5 +1,5 @@
 from fastapi import APIRouter,Depends
-from dependecies import verificar_admin
+from backend.app.dependecies import verificar_admin
 
 notification_router = APIRouter(prefix="/notification", tags=['roteador_notification'],dependencies=[Depends(verificar_admin)])
 
