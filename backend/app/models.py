@@ -8,7 +8,7 @@ from datetime import datetime,timedelta
 from sqlalchemy import create_engine,Column,String,Integer,Boolean,Float,ForeignKey,DateTime,Text,Date
 from sqlalchemy.orm import declarative_base,relationship
 
-db=create_engine("sqlite:///banco.db")
+db = create_engine("sqlite:///backend/banco.db")
 
 base=declarative_base()
 

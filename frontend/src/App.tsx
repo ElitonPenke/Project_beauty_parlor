@@ -1,10 +1,34 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { TelaLogin } from './pages/Login';
+import { TelaAgenda } from './pages/Agenda'; // Importamos a tela nova
+import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
+
+const temaEscuro = createTheme({
+  palette: { mode: 'dark' },
+});
+
 function App() {
   return (
-    <div>
-      <h1>Sistema de Gerenciamento - Salão de Beleza</h1>
-      <p>O front-end está pronto para receber componentes!</p>
-    </div>
-  )
+    <ThemeProvider theme={temaEscuro}>
+      <CssBaseline />
+      
+      {/* O BrowserRouter é o motor que entende a URL do navegador */}
+      <BrowserRouter>
+        {/* O Routes é o "mapa" */}
+        <Routes>
+          {/* Se a URL for exatamente "/", mostre o Login */}
+          <Route path="/" element={<TelaLogin />} />
+          
+          {/* Se a URL for "/agenda", mostre a Agenda */}
+          <Route path="/agenda" element={<TelaAgenda />} />
+
+
+          
+        </Routes>
+      </BrowserRouter>
+
+    </ThemeProvider>
+  );
 }
 
-export default App
+export default App;

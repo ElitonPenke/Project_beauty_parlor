@@ -1,5 +1,5 @@
 from fastapi import Depends,HTTPException
-from sqlalchemy.orm import sessionmaker,Session # aqui faz uma seção para n ter paraleelismo de compretividade de requisições no meu banco de dados
+from sqlalchemy.orm import sessionmaker # aqui faz uma seção para n ter paraleelismo de compretividade de requisições no meu banco de dados
 from backend.app.models import db, Cliente #importar para fazer pesquisa no meu bd
 import jwt
 from backend.app.main import SECRET_KEY,ALG,oauth2_schema
