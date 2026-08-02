@@ -1,6 +1,7 @@
 //"motor de arranque". É ele quem olha para o resto das pastas, pega o React e ejeta na tela do navegador.
 
 //cd frontend
+// instalar dependencias do front --> npm install
 // para ligar o front --> npm run dev
 
 import { StrictMode } from 'react'
