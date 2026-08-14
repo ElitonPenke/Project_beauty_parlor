@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from backend.app.dependecies import pegar_sessao, verificar_admin, verificar_token
 from backend.app.models import Bloqueio,Cliente
 from backend.app.schemas import BloqueioSchema
+from backend.app.utils.validadores import validar_dados_bloqueio
 
 
 loked_router = APIRouter(prefix="/loked", tags=['roteador_loked'],dependencies=[Depends(verificar_admin)])
@@ -10,7 +11,11 @@ loked_router = APIRouter(prefix="/loked", tags=['roteador_loked'],dependencies=[
 
 @loked_router.post("/bloqueio/adicionar_bloqueio")
 async def adicionar_bloqueio(bloquio_schema:BloqueioSchema, session: Session = Depends(pegar_sessao),usuario:Cliente = Depends(verificar_token)):
-    novo_bloqueio= Bloqueio(data=bloquio_schema.data,dia_inteiro=bloquio_schema.dia_inteiro,hora_inicio=bloquio_schema.hora_inicio,hora_fim=bloquio_schema.hora_fim,motivo=bloquio_schema.motivo)
+    
+    validar_dados_bloqueio(bloquio_schema.dia_inteiro, bloquio_schema.hora_inicio, bloquio_schema.hora_fim)
+    
+    novo_bloqueio= Bloqueio(data=bloquio_schema.data,dia_inteiro=bloquio_schema.dia_inteiro,
+                            hora_inicio=bloquio_schema.hora_inicio,hora_fim=bloquio_schema.hora_fim,motivo=bloquio_schema.motivo)
    
     session.add(novo_bloqueio)
     session.commit()

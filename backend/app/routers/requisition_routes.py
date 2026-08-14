@@ -3,6 +3,7 @@ from backend.app.dependecies import pegar_sessao,verificar_token,verificar_admin
 from sqlalchemy.orm import Session
 from backend.app.models import Cliente, AgendamentoServico,Agendamento,Servico,Cor
 from backend.app.schemas import AgendamentoSchema
+from backend.app.utils.validadores import montar_itens_servico, verificar_bloqueio, verificar_conflito_horario
 
 requisition_router = APIRouter(prefix="/requisition", tags=['roteador_requisition'])
 
@@ -23,60 +24,20 @@ async def criar_agendamento(
     session.add(novo_agendamento)
     session.flush()
 
-
-    #para cada serviço em si dentro de serviços de novo_agendamento
-    for item in agendamento_schema.servicos:
-        #pega o id do serviço
-        servico = session.query(Servico).filter(Servico.id == item.id_servico).first()
-
-        if not servico:
-            raise HTTPException(status_code=404,detail=f"Serviço {item.id_servico} não encontrado."
-            )
-
-        if item.id_cor is not None:
-            #vai pegar o id da cor, ou tentar
-            cor = session.query(Cor).filter(Cor.id == item.id_cor).first()
-
-            #validação basico de ter ou n no sistema
-            if not cor:
-                raise HTTPException(status_code=404,detail=f"Cor {item.id_cor} não encontrada.")
-        print(item)
-
-        #novo registro na tabela de ligação N:N
-        item_agendamento = AgendamentoServico(
-            id_agendamento=novo_agendamento.id, #pega o id do item adicionado (novo_agendamento)
-            id_servico=servico.id, #a variavel momentanea do loop
-            id_cor=item.id_cor, #a variavel momentanea do loop
-            preco_momento=servico.preco, #a variavel momentanea do loop
-            duracao_total_momento=servico.duracao_min #a variavel momentanea do loop
-        )
-        
-        novo_agendamento.servicos.append(item_agendamento)
-        
+    itens = montar_itens_servico(session, novo_agendamento.id, agendamento_schema.servicos)
+    novo_agendamento.servicos.extend(itens)
     session.flush()
 
-    #calcula e escreve no bd
     novo_agendamento.calcular_termino()
-    
-    
-    conflito = session.query(Agendamento).filter(
-        Agendamento.id != novo_agendamento.id,
-        Agendamento.data == novo_agendamento.data,
-        Agendamento.status!="CALCELADO",
-        Agendamento.horario_inicio < novo_agendamento.horario_termino,
-        Agendamento.horario_termino > novo_agendamento.horario_inicio
-    ).first()
 
-    
-    if conflito:
-        raise HTTPException(status_code=400,detail="Já existe um agendamento nesse horário.")
-
+    verificar_conflito_horario(session, novo_agendamento)
+    verificar_bloqueio(session, novo_agendamento)
 
     preco_total = novo_agendamento.calcular_preco()
 
     session.commit()
-
     session.refresh(novo_agendamento)
+    
     return {
         "mensagem": "Agendamento criado com sucesso.",
 

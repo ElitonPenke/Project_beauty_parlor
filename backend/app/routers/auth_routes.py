@@ -8,6 +8,8 @@ import jwt
 from sqlalchemy.orm import Session
 from datetime import datetime,timedelta,timezone
 
+from backend.app.utils.validadores import validar_telefone
+
 auth_router = APIRouter(prefix="/authentication", tags=['roteador_authentication'])
 
 #----------------------------------------------------------------------------------------------------------------
@@ -35,6 +37,11 @@ def autenticar_usuario(email,senha,session):
 
 @auth_router.post("/criar_conta")                
 async def criar_conta(cliente_Schema:UsuarioSchema,session:Session = Depends(pegar_sessao)): 
+    
+    try:
+        telefone_validado = validar_telefone(cliente_Schema.telefone)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="numero de telefone invalido")
     
     usuario= session.query(Cliente).filter(Cliente.email==cliente_Schema.email).first()
     celular=session.query(Cliente).filter(Cliente.telefone==cliente_Schema.telefone).first()
