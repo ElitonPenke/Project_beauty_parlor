@@ -2,7 +2,7 @@ from fastapi import APIRouter,Depends,HTTPException
 from fastapi.security import OAuth2PasswordRequestForm 
 from backend.app.models import Cliente
 from backend.app.dependecies import pegar_sessao,verificar_token
-from backend.app.schemas import UsuarioSchema,LoginSchema 
+from backend.app.schemas import EditUsuarioSchema, UsuarioSchema,LoginSchema 
 from backend.app.main import bcrypt,ACCESS_TOKEN_EXPERIUS_MINUTES,ALG,SECRET_KEY
 import jwt
 from sqlalchemy.orm import Session
@@ -120,6 +120,31 @@ async def use_refresh_token(usuario:Cliente = Depends(verificar_token)):
             'access_token':access_token,
             'token_type': "Bearer"
             }
+
+
+#editar perfil
+@auth_router.patch("/editar_perfil/{id_conta}")
+async def editar_servico(id_conta:int, atualizar_perfil:EditUsuarioSchema, session: Session = Depends(pegar_sessao), usuario:Cliente = Depends(verificar_token)):
+    
+    if usuario.id != id_conta and not usuario.admin:
+        raise HTTPException(status_code=400, detail="Função apenas para Admin") 
+
+    perfil_editar=session.query(Cliente).filter(Cliente.id == id_conta).first()
+    
+    if not perfil_editar:
+        raise HTTPException(status_code=400,detail="Usuario não encontrado")
+    
+    dados_para_atualizar = atualizar_perfil.model_dump(exclude_unset=True)
+
+    for chave, valor in dados_para_atualizar.items():
+        setattr(perfil_editar, chave, valor)
+
+    session.commit()
+    session.refresh(perfil_editar)
+
+    return {"mensagem": f"Seu perfil '{perfil_editar.nome}' foi atualizado parcialmente com sucesso!"}
+    
+    
     
     
     

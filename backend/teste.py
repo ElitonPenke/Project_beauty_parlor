@@ -5,6 +5,8 @@ session=Session()
 
 
 #deletar somente um
-session.query(Cliente).filter(Cliente.id ==1).delete()
+session.query(Cliente).delete()
 session.commit()
 session.close()
+
+print("deletado com sucesso")

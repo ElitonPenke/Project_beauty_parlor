@@ -17,13 +17,29 @@ class UsuarioSchema(BaseModel):
     dataNascimento:date
     endereco:str
 
-    ativo:Optional[bool]
-    admin:Optional[bool]
+    ativo:Optional[bool] = True
+    admin:Optional[bool] = False
     
     #crio um subclass para linkar com o meu models do db(vai ser interpretado para tranformar para SQL)
     class Config:
         from_attributes=True
  
+class EditUsuarioSchema(BaseModel):
+    nome:Optional [str]=None
+    email:Optional [EmailStr]=None
+    telefone:Optional [str]=None
+    senha: Optional [str]=None
+    sexo:Optional [str]=None
+    dataNascimento:Optional [date]=None
+    endereco:Optional [str]=None
+    ativo:Optional[bool]=None
+    admin:Optional[bool]=None
+    
+    #crio um subclass para linkar com o meu models do db(vai ser interpretado para tranformar para SQL)
+    class Config:
+        from_attributes=True
+
+
 class LoginSchema(BaseModel):
     email:str
     senha:str

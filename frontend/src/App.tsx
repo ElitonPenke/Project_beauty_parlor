@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { TelaLogin } from './pages/Login';
-import { TelaAgenda } from './pages/Agenda'; // Importamos a tela nova
+import { TelaAgenda } from './pages/Agenda'; 
+import { TelaCriarConta } from './pages/CriarConta'; 
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 
 const temaEscuro = createTheme({
@@ -21,6 +22,9 @@ function App() {
           
           {/* Se a URL for "/agenda", mostre a Agenda */}
           <Route path="/agenda" element={<TelaAgenda />} />
+ 
+          {/* Se a URL for "/criarconta", mostre a Agenda */}
+          <Route path="/criarconta" element={<TelaCriarConta />} />
 
 
           
