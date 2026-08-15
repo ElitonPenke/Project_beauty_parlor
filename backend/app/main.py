@@ -38,7 +38,6 @@ from backend.app.routers.auth_routes import auth_router
 from backend.app.routers.requisition_routes import requisition_router
 from backend.app.routers.services_routes import services_router
 from backend.app.routers.colors_routes import colors_router
-from backend.app.routers.notification_routes import notification_router
 from backend.app.routers.loked_routes import loked_router
 
 app.include_router(auth_router)
@@ -46,4 +45,3 @@ app.include_router(requisition_router)
 app.include_router(services_router)
 app.include_router(colors_router)
 app.include_router(loked_router)
-app.include_router(notification_router)

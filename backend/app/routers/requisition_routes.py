@@ -107,7 +107,7 @@ async def visualizar_pedido (id_agendamento: int,session:Session = Depends(pegar
 
 #confirmar agendamento
 @requisition_router.post("/agendamento/confirmar/{id_agendamento}") 
-async def confrimar_agendamento (id_agendamento: int,session:Session = Depends(pegar_sessao),usuario:Cliente = Depends(verificar_token)):
+async def confirmar_agendamento (id_agendamento: int,session:Session = Depends(pegar_sessao),usuario:Cliente = Depends(verificar_token)):
     agendamento=session.query(Agendamento).filter(Agendamento.id==id_agendamento).first() 
     
     if not agendamento:
@@ -125,7 +125,7 @@ async def confrimar_agendamento (id_agendamento: int,session:Session = Depends(p
 
 #finalizar/concluir agendamento
 @requisition_router.post("/agendamento/finalizar/{id_agendamento}") 
-async def confrimar_agendamento (id_agendamento: int,session:Session = Depends(pegar_sessao),usuario:Cliente = Depends(verificar_token)):
+async def finalizar_agendamento (id_agendamento: int,session:Session = Depends(pegar_sessao),usuario:Cliente = Depends(verificar_token)):
     
     agendamento=session.query(Agendamento).filter(Agendamento.id==id_agendamento).first() 
     

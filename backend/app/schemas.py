@@ -97,12 +97,23 @@ class AgendamentoSchema(BaseModel):
 class BloqueioSchema(BaseModel):
     data:date
     dia_inteiro:bool
-    hora_inicio:date
-    hora_fim:date
+    hora_inicio:Optional[datetime]=None
+    hora_fim:Optional[datetime]=None
     motivo:str
     
     class Config:
                     from_attributes=True
+                    
+   
+class EditBloqueioSchema (BaseModel):
+    data:Optional[date]=None
+    dia_inteiro:Optional[bool]=None
+    hora_inicio:Optional[datetime]=None
+    hora_fim:Optional[datetime]=None
+    motivo:Optional[str]=None
+    
+    class Config:
+        from_attributes=True
 
 
 #PADRÕES DE RESPOSTA DE DADOS ---------------------------------------

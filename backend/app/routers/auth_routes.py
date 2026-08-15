@@ -85,7 +85,7 @@ async def criar_conta_admin(cliente_Schema:UsuarioSchema,session:Session = Depen
     
         senha_criptgrafada=bcrypt.hashpw(cliente_Schema.senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         
-        novo_usuario= Cliente(cliente_Schema.nome,cliente_Schema.email,senha_criptgrafada,cliente_Schema.telefone,cliente_Schema.endereco,cliente_Schema.ativo,cliente_Schema.admin)
+        novo_usuario= Cliente(cliente_Schema.nome,cliente_Schema.email,cliente_Schema.telefone,senha_criptgrafada,cliente_Schema.sexo,cliente_Schema.dataNascimento,cliente_Schema.endereco,cliente_Schema.ativo,cliente_Schema.admin)
         
         session.add(novo_usuario)
         session.commit()

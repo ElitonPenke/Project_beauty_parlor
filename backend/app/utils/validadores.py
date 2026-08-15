@@ -1,6 +1,6 @@
 import re
 from fastapi import HTTPException
-from models import Servico, Cor, Agendamento, Bloqueio, AgendamentoServico
+from backend.app.models import Servico, Cor, Agendamento, Bloqueio, AgendamentoServico
 
 
 padrao_telefone = re.compile(r"([0-9]{2,3}?)?([1-9]{2})([6-9])?([0-9]{4})([0-9]{4})")

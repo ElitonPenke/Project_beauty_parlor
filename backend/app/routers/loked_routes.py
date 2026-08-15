@@ -2,9 +2,10 @@ from fastapi import APIRouter,Depends, HTTPException
 from sqlalchemy.orm import Session
 from backend.app.dependecies import pegar_sessao, verificar_admin, verificar_token
 from backend.app.models import Bloqueio,Cliente
-from backend.app.schemas import BloqueioSchema
+from backend.app.schemas import BloqueioSchema, EditBloqueioSchema
 from backend.app.utils.validadores import validar_dados_bloqueio
 
+#com o null em date
 
 loked_router = APIRouter(prefix="/loked", tags=['roteador_loked'],dependencies=[Depends(verificar_admin)])
 
@@ -47,8 +48,29 @@ async def deletar_bloqueio(id_bloqueio:int, session: Session = Depends(pegar_ses
 
     session.commit()
     return{
-        "mensagem":"Cor desativado com sucesso"
+        "mensagem":"Bloqueio desativado com sucesso"
     }
     
+
+@loked_router.patch("/editar_bloqueio/{id_bloq}")
+async def editar_cor(id_bloq:int, atualizar_bloq:EditBloqueioSchema, session: Session = Depends(pegar_sessao), usuario:Cliente = Depends(verificar_token)):
+    
+    if usuario.admin==False:
+        raise HTTPException(status_code=400, detail="Função apenas para Admin") 
+    
+    bloq_editar=session.query(Bloqueio).filter(Bloqueio.id == id_bloq).first()
+    
+    if not bloq_editar:
+        raise HTTPException(status_code=400,detail="Registro de bloqueio não encontrado")
+    
+    dados_para_atualizar = atualizar_bloq.model_dump(exclude_unset=True)
+
+    for chave, valor in dados_para_atualizar.items():
+        setattr(bloq_editar, chave, valor)
+
+    session.commit()
+    session.refresh(bloq_editar)
+
+    return {"mensagem": f"O bloqueio '{bloq_editar.nome}' foi atualizado parcialmente com sucesso!"}
     
     
