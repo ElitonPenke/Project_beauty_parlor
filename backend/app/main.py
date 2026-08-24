@@ -1,7 +1,7 @@
 #ativar --  .\venv\Scripts\activate
 #deactivate
 
-#liga o servidor FastAPI uvicorn backend.app.main:app --reload
+#liga o servidor FastAPI uvicorn "python -m uvicorn backend.app.main:app --reload"
 # pip install -r requirements.txt
 
 import bcrypt #criptografar as senhas

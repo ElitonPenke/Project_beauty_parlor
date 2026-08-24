@@ -2,16 +2,12 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { TelaLogin } from './pages/Login';
 import { TelaAgenda } from './pages/Agenda'; 
 import { TelaCriarConta } from './pages/CriarConta'; 
-import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
-
-const temaEscuro = createTheme({
-  palette: { mode: 'dark' },
-});
+import {LightThme} from './themes/light';
+import { ThemeProvider } from '@mui/material';
 
 function App() {
   return (
-    <ThemeProvider theme={temaEscuro}>
-      <CssBaseline />
+    <ThemeProvider theme={LightThme}>
       
       {/* O BrowserRouter é o motor que entende a URL do navegador */}
       <BrowserRouter>
